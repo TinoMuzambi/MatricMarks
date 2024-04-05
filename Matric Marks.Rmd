@@ -12,6 +12,9 @@ knitr::opts_chunk$set(echo = TRUE)
 # Libraries
 ```{r}
 library(tidyverse)
+library(sf)
+library(rnaturalearth)
+library(tmap)
 ```
 
 
@@ -137,5 +140,26 @@ bachelor.pass.long %>%
   labs(x = "Matric Class", y = "Proportion", fill = "Type") +
   scale_y_continuous(labels = scales::percent_format()) +
   theme_minimal()
+```
+# Choropleth Map: Learners who Passed with Bachelor Pass in the Latest Year
+```{r}
+# Load South Africa province boundaries
+sa.provinces <- ne_states(country = "South Africa", returnclass = "sf")
+
+# Filter data for the latest year and join with province boundaries
+latest.year <- max(bachelor.pass.long$matric_class)
+bachelor.latest <- bachelor.pass.long %>%
+  filter(matric_class == latest.year, type == "passed")
+
+map.data <- left_join(sa.provinces, bachelor.latest, by = c("name" = "province"))
+
+# Create the choropleth map
+marks.map <- tm_shape(map.data) +
+  tm_fill("value", style = "quantile", title = "Learners Passed\nwith Bachelor Pass") +
+  tm_text("name", size = 0.8) +
+  tm_layout(frame = F,
+            legend.outside = T,
+            legend.position = c("right", "center"))
+marks.map
 ```
 
