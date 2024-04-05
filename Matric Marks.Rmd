@@ -127,7 +127,17 @@ pass.wrote.line <- bachelor.pass.long %>%
   geom_line(aes(y = num.passed, group = province), linetype = "dashed") +
   facet_wrap(~province, scales = "free_y") +
   labs(x = "Matric Class", y = "Number of Learners", color = "Type") +
-  theme_minimal()
+  theme_minimal() +
+  theme(
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    legend.background = element_rect(fill='transparent'), #transparent legend bg
+    legend.box.background = element_rect(fill='transparent') #transparent legend panel
+  )
+
+ggsave("./plots/Pass Wrote Line.png", pass.wrote.line, bg = "transparent", scale = 5, dpi = 1000)
 pass.wrote.line
 ```
 # Stacked Bar Chart: Proportion of Learners who Passed with Bachelor Pass
@@ -166,9 +176,8 @@ map.data <- left_join(sa.provinces, bachelor.latest, by = c("name" = "province")
 # Create the choropleth map
 marks.map <- tm_shape(map.data) +
   tm_fill("num.passed", style = "quantile", title = "Learners Passed\nwith Bachelor Pass") +
-  tm_text("name", size = 0.8) +
   tm_layout(frame = F,
-            legend.outside = T,
+            legend.show = F,
             legend.position = c("right", "center"))
 tmap_save(marks.map, filename = "./plots/Marks Map.png", dpi = 1500, scale = 2)
 
