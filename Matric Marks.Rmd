@@ -21,7 +21,7 @@ library(tmap)
 # Read data
 ```{r}
 bachelor <- read.csv("./data/South_Africa_Bachelor_passes_by_province.csv") %>% as_tibble()
-maths <- read.csv("./data/South_Africa_Bachelor_passes_by_province.csv") %>% as_tibble()
+maths <- read.csv("./data/South_Africa_National_Senior_Certificate_Maths_results.csv") %>% as_tibble()
 physics <- read.csv("./data/South_Africa_National_Senior_Certificate_Physical_Science_results_v2.csv") %>% as_tibble()
 ```
 
@@ -77,31 +77,26 @@ pivot_longer(
 
 # Pivot Maths Longer
 ```{r}
+percent.values <- c("30percent", "40percent", "50percent")
+
 maths.long <- maths %>%
 pivot_longer(
     cols = c(starts_with("zaf"), starts_with("ec"), starts_with("fs"),
              starts_with("gp"), starts_with("kzn"), starts_with("lp"),
              starts_with("mp"), starts_with("nw"), starts_with("nc"),
              starts_with("wc")),
-    names_to = c("province", "ignore1", "data1", "data2","ignore2", "ignore3", "ignore4"),
+    names_to = c("province", "ignore1", "ignore2", "ignore3","ingore4", "pass.rate"),
     names_sep = "_",
     values_to = "value"
   ) %>%
-  select(matric_class, province, data1, data2, value) %>% 
-  mutate(type = case_when(
-    grepl("passed", data1) | grepl("passed", data2) ~ "passed",
-    grepl("wrote", data1) | grepl("wrote", data2) ~ "wrote"
-  )) %>% 
-  select(-c("data1", "data2")) %>%
-  pivot_wider(names_from = type, values_from = value) %>%
-  rename(num.wrote = `wrote`, num.passed = `passed`)%>% 
-  mutate(province = province.names[province]) # Replace provinces with full name.
+  select(matric_class, province, pass.rate, value) %>% 
+  mutate(province = province.names[province], pass.rate = as.numeric(str_extract(pass.rate, "\\d+"))) %>% # Replace provinces with full name.
+  pivot_wider(names_from = pass.rate, values_from = value) %>%
+  rename(thirty = `30`, fourty = `40`, fifty = `50`)
 ```
 
 Pivot Physics Longer
 ```{r}
-percent.values <- c("30percent", "40percent", "50percent")
-
 physics.long <- physics %>%
 pivot_longer(
     cols = c(starts_with("zaf"), starts_with("ec"), starts_with("fs"),
@@ -178,7 +173,9 @@ marks.map <- tm_shape(map.data) +
   tm_fill("num.passed", style = "quantile", title = "Learners Passed\nwith Bachelor Pass") +
   tm_layout(frame = F,
             legend.show = F,
-            legend.position = c("right", "center"))
+            legend.position = c("right", "center"),
+            bg.color = "transparent")
+
 tmap_save(marks.map, filename = "./plots/Marks Map.png", dpi = 1500, scale = 2)
 
 marks.map
