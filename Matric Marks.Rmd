@@ -121,14 +121,14 @@ pivot_longer(
 
 # Line Chart: Trend of Learners who Wrote Matric Exams and Passed with Bachelor Pass
 ```{r}
-all.provinces.plot <- bachelor.pass.long %>% 
+pass.wrote.line <- bachelor.pass.long %>% 
   ggplot(aes(x = matric_class)) +
   geom_line(aes(y = num.wrote, group = province)) +
   geom_line(aes(y = num.passed, group = province), linetype = "dashed") +
   facet_wrap(~province, scales = "free_y") +
   labs(x = "Matric Class", y = "Number of Learners", color = "Type") +
   theme_minimal()
-all.provinces.plot
+pass.wrote.line
 ```
 # Stacked Bar Chart: Proportion of Learners who Passed with Bachelor Pass
 
@@ -142,13 +142,14 @@ bachelor.pass.proportions <- bachelor.pass.long %>%
   mutate(proportion = value / sum(value)) %>%
   ungroup()
 
-bachelor.pass.proportions %>%
+pass.proportion.hist <- bachelor.pass.proportions %>%
   ggplot(aes(x = matric_class, y = proportion, fill = type)) +
   geom_col(position = "fill") +
   facet_wrap(~province, scales = "free_y") +
   labs(x = "Matric Class", y = "Proportion", fill = "Type") +
   scale_y_continuous(labels = scales::percent_format()) +
   theme_minimal()
+pass.proportion.hist
 ```
 # Choropleth Map: Learners who Passed with Bachelor Pass in the Latest Year
 ```{r}
@@ -173,21 +174,23 @@ marks.map
 ```
 # Scatter Plot: Relationship between Learners who Wrote Exams and Passed with Bachelor Pass
 ```{r}
-ggplot(bachelor.pass.long, aes(x = num.wrote, y = num.passed, color = province)) +
+wrote.pass.scatter <- ggplot(bachelor.pass.long, aes(x = num.wrote, y = num.passed, color = province)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   labs(x = "Learners who Wrote Matric Exams", y = "Learners Passed with Bachelor Pass", color = "Province") +
   theme_minimal()
+wrote.pass.scatter
 ```
 
 # Bar Chart: Comparison of Learners who Passed with Bachelor Pass across Provinces in the Latest Year
 ```{r}
-bachelor.pass.long %>% 
+num.pass.bar <- bachelor.pass.long %>% 
   filter(matric_class == latest.year) %>% 
   ggplot(aes(x = reorder(province, num.passed), y = num.passed)) +
   geom_col(aes(fill = province)) +
   labs(x = "Province", y = "Learners Passed with Bachelor Pass") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+num.pass.bar
 ```
 
