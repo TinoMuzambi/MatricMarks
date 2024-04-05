@@ -171,12 +171,23 @@ marks.map <- tm_shape(map.data) +
             legend.position = c("right", "center"))
 marks.map
 ```
-
+# Scatter Plot: Relationship between Learners who Wrote Exams and Passed with Bachelor Pass
 ```{r}
 ggplot(bachelor.pass.long, aes(x = num.wrote, y = num.passed, color = province)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   labs(x = "Learners who Wrote Matric Exams", y = "Learners Passed with Bachelor Pass", color = "Province") +
   theme_minimal()
+```
+
+# Bar Chart: Comparison of Learners who Passed with Bachelor Pass across Provinces in the Latest Year
+```{r}
+bachelor.pass.long %>% 
+  filter(matric_class == latest.year) %>% 
+  ggplot(aes(x = reorder(province, num.passed), y = num.passed)) +
+  geom_col(aes(fill = province)) +
+  labs(x = "Province", y = "Learners Passed with Bachelor Pass") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
