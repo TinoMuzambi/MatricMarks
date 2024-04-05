@@ -1,0 +1,33 @@
+---
+title: "Matric Marks"
+author: "Tino Muzambi"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Libraries
+```{r}
+library(tidyverse)
+```
+
+
+# Read data
+```{r}
+bachelor.pass <- read.csv("./data/South_Africa_Bachelor_passes_by_province.csv") %>% as_tibble()
+maths <- read.csv("./data/South_Africa_Bachelor_passes_by_province.csv") %>% as_tibble()
+physics <- read.csv("./data/South_Africa_National_Senior_Certificate_Physical_Science_results_v2.csv") %>% as_tibble()
+```
+
+# Look at data
+```{r}
+summary(bachelor.pass)
+
+summary(maths)
+
+summary(physics)
+```
+
