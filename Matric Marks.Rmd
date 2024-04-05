@@ -133,11 +133,19 @@ all.provinces.plot
 # Stacked Bar Chart: Proportion of Learners who Passed with Bachelor Pass
 
 ```{r}
-bachelor.pass.long %>%
-  mutate(proportion = ifelse(type == "passed", value / sum(value), value / sum(value))) %>%
+
+# Calculate the proportions
+bachelor.pass.proportions <- bachelor.pass.long %>%
+  mutate(total = num.wrote + num.passed) %>%
+  pivot_longer(cols = c("num.wrote", "num.passed"), names_to = "type", values_to = "value") %>%
+  group_by(matric_class, province) %>%
+  mutate(proportion = value / sum(value)) %>%
+  ungroup()
+
+bachelor.pass.proportions %>%
   ggplot(aes(x = matric_class, y = proportion, fill = type)) +
   geom_col(position = "fill") +
-  facet_grid(rows = vars(province)) +
+  facet_wrap(~province, scales = "free_y") +
   labs(x = "Matric Class", y = "Proportion", fill = "Type") +
   scale_y_continuous(labels = scales::percent_format()) +
   theme_minimal()
