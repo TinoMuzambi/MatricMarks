@@ -72,7 +72,7 @@ pivot_longer(
   select(-c("data1", "data2")) %>%
   pivot_wider(names_from = type, values_from = value) %>%
   rename(num.wrote = `wrote`, num.passed = `passed`)%>% 
-  mutate(province = province.names[province]) # Replace provinces with full name
+  mutate(province = province.names[province]) # Replace provinces with full name.
 ```
 
 # Pivot Maths Longer
@@ -95,7 +95,7 @@ pivot_longer(
   select(-c("data1", "data2")) %>%
   pivot_wider(names_from = type, values_from = value) %>%
   rename(num.wrote = `wrote`, num.passed = `passed`)%>% 
-  mutate(province = province.names[province]) # Replace provinces with full name
+  mutate(province = province.names[province]) # Replace provinces with full name.
 ```
 
 Pivot Physics Longer
@@ -122,8 +122,9 @@ pivot_longer(
 # Line Chart: Trend of Learners who Wrote Matric Exams and Passed with Bachelor Pass
 ```{r}
 all.provinces.plot <- bachelor.pass.long %>% 
-  ggplot(aes(x = matric_class, y = value, color = type, group = interaction(province, type))) +
-  geom_line() +
+  ggplot(aes(x = matric_class)) +
+  geom_line(aes(y = num.wrote, group = province)) +
+  geom_line(aes(y = num.passed, group = province), linetype = "dashed") +
   facet_wrap(~province, scales = "free_y") +
   labs(x = "Matric Class", y = "Number of Learners", color = "Type") +
   theme_minimal()
@@ -164,7 +165,7 @@ marks.map
 ```
 
 ```{r}
-ggplot(bachelor.pass.long, aes(x = value[type == "wrote"], y = value[type == "passed"], color = province)) +
+ggplot(bachelor.pass.long, aes(x = num.wrote, y = num.passed, color = province)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   labs(x = "Learners who Wrote Matric Exams", y = "Learners Passed with Bachelor Pass", color = "Province") +
