@@ -29,5 +29,19 @@ summary(bachelor.pass)
 summary(maths)
 
 summary(physics)
+
+# Need to pivot to include region field.
 ```
 
+# Clean up data
+```{r}
+# Drop date
+bachelor.pass <- bachelor.pass %>% 
+  select(-date)
+
+maths <- maths %>% 
+  select(-date)
+
+physics <- physics %>% 
+  select(-date)
+```
