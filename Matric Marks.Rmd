@@ -75,8 +75,50 @@ bachelor.pass.long <- bachelor.pass.long %>%
   mutate(province = province.names[province])
 ```
 
+# Pivot Maths Longer
+```{r}
+maths.long <- maths %>%
+pivot_longer(
+    cols = c(starts_with("zaf"), starts_with("ec"), starts_with("fs"),
+             starts_with("gp"), starts_with("kzn"), starts_with("lp"),
+             starts_with("mp"), starts_with("nw"), starts_with("nc"),
+             starts_with("wc")),
+    names_to = c("province", "ignore1", "data1", "data2","ignore2", "ignore3", "ignore4"),
+    names_sep = "_",
+    values_to = "value"
+  ) %>%
+  select(matric_class, province, data1, data2, value) %>% 
+  mutate(type = case_when(
+    grepl("passed", data1) | grepl("passed", data2) ~ "passed",
+    grepl("wrote", data1) | grepl("wrote", data2) ~ "wrote"
+  )) %>% 
+  select(-c("data1", "data2")) %>% 
+  mutate(province = province.names[province])
+```
 
-# Plot of all provinces pass and wrote.
+Pivot Physics Longer
+```{r}
+physics.long <- physics %>%
+pivot_longer(
+    cols = c(starts_with("zaf"), starts_with("ec"), starts_with("fs"),
+             starts_with("gp"), starts_with("kzn"), starts_with("lp"),
+             starts_with("mp"), starts_with("nw"), starts_with("nc"),
+             starts_with("wc")),
+    names_to = c("province", "ignore1", "ignore2", "ignore3","ingore4", "pass.rate"),
+    names_sep = "_",
+    values_to = "value"
+  ) %>%
+  select(matric_class, province, data1, data2, value) %>% 
+  mutate(type = case_when(
+    grepl("passed", data1) | grepl("passed", data2) ~ "passed",
+    grepl("wrote", data1) | grepl("wrote", data2) ~ "wrote"
+  )) %>% 
+  select(-c("data1", "data2")) %>% 
+  mutate(province = province.names[province])
+```
+
+
+# Line chart of all provinces pass and wrote.
 ```{r}
 all.provinces.plot <- bachelor.pass.long %>% 
   ggplot(aes(x = matric_class, y = value, color = type, group = interaction(province, type))) +
