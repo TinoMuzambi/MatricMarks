@@ -202,4 +202,46 @@ num.pass.bar <- bachelor.long %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 num.pass.bar
 ```
+# Line Chart: Trend of Proportion Learners With Various Percentage Pass in Maths
+```{r}
+math.pass.type <- maths.long %>% 
+  ggplot(aes(x = matric_class)) +
+  geom_line(aes(y =  thirty, group = province)) +
+  geom_line(aes(y = fourty, group = province), linetype = "dashed") +
+  geom_line(aes(y = fifty, group = province), color = "red") +
+  facet_wrap(~province, scales = "free_y") +
+  labs(x = "Matric Class", y = "Percentage of Learners", color = "Type") +
+  theme_minimal() +
+  theme(
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    legend.background = element_rect(fill='transparent'), #transparent legend bg
+    legend.box.background = element_rect(fill='transparent') #transparent legend panel
+  )
 
+math.pass.type
+```
+
+# Line Chart: Trend of Proportion Learners With Various Percentage Pass in Physics
+```{r}
+physics.pass.type <- physics.long %>% 
+  ggplot(aes(x = matric_class)) +
+  geom_line(aes(y =  thirty, group = province)) +
+  geom_line(aes(y = fourty, group = province), linetype = "dashed") +
+  geom_line(aes(y = fifty, group = province), color = "red") +
+  facet_wrap(~province, scales = "free_y") +
+  labs(x = "Matric Class", y = "Percentage of Learners", color = "Type") +
+  theme_minimal() +
+  theme(
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    legend.background = element_rect(fill='transparent'), #transparent legend bg
+    legend.box.background = element_rect(fill='transparent') #transparent legend panel
+  )
+
+physics.pass.type
+```
