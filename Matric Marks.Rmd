@@ -46,7 +46,6 @@ physics <- physics %>%
 ```
 
 # Pivot Longer
-
 ```{r}
 bachelor.pass.long <- bachelor.pass %>%
 pivot_longer(
@@ -64,5 +63,27 @@ pivot_longer(
     grepl("wrote", data1) | grepl("wrote", data2) ~ "wrote"
   )) %>% 
   select(-c("data1", "data2"))
+```
+
+# Replace provinces with full name
+```{r}
+province.names <- c("zaf" = "South Africa", "ec" = "Eastern Cape", "fs" = "Free State", "gp" = "Gauteng",
+                    "kzn" = "KwaZulu-Natal", "lp" = "Limpopo", "mp" = "Mpumalanga", "nw" = "North West",
+                    "nc" = "Northern Cape", "wc" = "Western Cape")
+
+bachelor.pass.long <- bachelor.pass.long %>% 
+  mutate(province = province.names[province])
+```
+
+
+# Plot of all provinces pass and wrote.
+```{r}
+all.provinces.plot <- bachelor.pass.long %>% 
+  ggplot(aes(x = matric_class, y = value, color = type, group = interaction(province, type))) +
+  geom_line() +
+  facet_wrap(~province, scales = "free_y") +
+  labs(x = "Matric Class", y = "Number of Learners", color = "Type") +
+  theme_minimal()
+all.provinces.plot
 ```
 
