@@ -170,8 +170,11 @@ marks.map <- tm_shape(map.data) +
   tm_layout(frame = F,
             legend.outside = T,
             legend.position = c("right", "center"))
+tmap_save(marks.map, filename = "./plots/Marks Map.png", dpi = 1500, scale = 2)
+
 marks.map
 ```
+
 # Scatter Plot: Relationship between Learners who Wrote Exams and Passed with Bachelor Pass
 ```{r}
 wrote.pass.scatter <- ggplot(bachelor.pass.long, aes(x = num.wrote, y = num.passed, color = province)) +
