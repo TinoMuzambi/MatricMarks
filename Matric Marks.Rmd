@@ -98,6 +98,8 @@ pivot_longer(
 
 Pivot Physics Longer
 ```{r}
+percent.values <- c("30percent", "40percent", "50percent")
+
 physics.long <- physics %>%
 pivot_longer(
     cols = c(starts_with("zaf"), starts_with("ec"), starts_with("fs"),
@@ -108,17 +110,13 @@ pivot_longer(
     names_sep = "_",
     values_to = "value"
   ) %>%
-  select(matric_class, province, data1, data2, value) %>% 
-  mutate(type = case_when(
-    grepl("passed", data1) | grepl("passed", data2) ~ "passed",
-    grepl("wrote", data1) | grepl("wrote", data2) ~ "wrote"
-  )) %>% 
-  select(-c("data1", "data2")) %>% 
-  mutate(province = province.names[province])
+  select(matric_class, province, pass.rate) %>% 
+  mutate(province = province.names[province],
+         pass.rate = as.numeric(str_extract(pass.rate, "\\d+")))
 ```
 
 
-# Line chart of all provinces pass and wrote.
+# Line Chart: Trend of Learners who Wrote Matric Exams and Passed with Bachelor Pass
 ```{r}
 all.provinces.plot <- bachelor.pass.long %>% 
   ggplot(aes(x = matric_class, y = value, color = type, group = interaction(province, type))) +
@@ -127,5 +125,17 @@ all.provinces.plot <- bachelor.pass.long %>%
   labs(x = "Matric Class", y = "Number of Learners", color = "Type") +
   theme_minimal()
 all.provinces.plot
+```
+# Stacked Bar Chart: Proportion of Learners who Passed with Bachelor Pass
+
+```{r}
+bachelor.pass.long %>%
+  mutate(proportion = ifelse(type == "passed", value / sum(value), value / sum(value))) %>%
+  ggplot(aes(x = matric_class, y = proportion, fill = type)) +
+  geom_col(position = "fill") +
+  facet_grid(rows = vars(province)) +
+  labs(x = "Matric Class", y = "Proportion", fill = "Type") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  theme_minimal()
 ```
 
