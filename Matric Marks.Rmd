@@ -72,7 +72,7 @@ pivot_longer(
   select(-c("data1", "data2")) %>%
   pivot_wider(names_from = type, values_from = value) %>%
   rename(num.wrote = `wrote`, num.passed = `passed`)%>% 
-  mutate(province = province.names[province]) # Replace provinces with full name.
+  mutate(province = province.names[province], percentage.pass = num.passed / num.wrote * 100) # Replace provinces with full name.
 ```
 
 # Pivot Maths Longer
@@ -170,11 +170,10 @@ map.data <- left_join(sa.provinces, bachelor.latest, by = c("name" = "province")
 
 # Create the choropleth map
 marks.map <- tm_shape(map.data) +
-  tm_fill("num.passed", style = "quantile", title = "Learners Passed\nwith Bachelor Pass") +
+  tm_fill("percentage.pass", style = "quantile") +
   tm_layout(frame = F,
             legend.show = F,
-            legend.position = c("right", "center"),
-            bg.color = "transparent")
+            legend.position = c("right", "center"))
 
 tmap_save(marks.map, filename = "./plots/Marks Map.png", dpi = 1500, scale = 2)
 
