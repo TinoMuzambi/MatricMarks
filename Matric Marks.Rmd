@@ -15,6 +15,7 @@ library(tidyverse)
 library(sf)
 library(rnaturalearth)
 library(tmap)
+library(ggpattern)
 ```
 
 
@@ -116,12 +117,14 @@ pivot_longer(
 
 # Line Chart: Trend of Learners who Wrote Matric Exams and Passed with Bachelor Pass
 ```{r}
-pass.wrote.line <- bachelor.long %>% 
+
+for (i in unique(bachelor.long$province)) {
+ pass.wrote.line <- bachelor.long %>% 
+   filter(province == i) %>% 
   ggplot(aes(x = matric_class)) +
-  geom_line(aes(y = num.wrote, group = province)) +
-  geom_line(aes(y = num.passed, group = province), linetype = "dashed") +
-  facet_wrap(~province, scales = "free_y") +
-  labs(x = "Matric Class", y = "Number of Learners", color = "Type") +
+  geom_line(aes(y = num.wrote), size = 2) +
+  geom_line(aes(y = num.passed), linetype = "dashed", size = 2) +
+  labs(x = "", y = "") +
   theme_minimal() +
   theme(
     panel.background = element_rect(fill='transparent'), #transparent panel bg
@@ -129,10 +132,15 @@ pass.wrote.line <- bachelor.long %>%
     panel.grid.major = element_blank(), #remove major gridlines
     panel.grid.minor = element_blank(), #remove minor gridlines
     legend.background = element_rect(fill='transparent'), #transparent legend bg
-    legend.box.background = element_rect(fill='transparent') #transparent legend panel
+    legend.box.background = element_rect(fill='transparent'),
+     axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    panel.border = element_blank()
+    #transparent legend panel
   )
 
-ggsave("./plots/Pass Wrote Line.png", pass.wrote.line, bg = "transparent", scale = 5, dpi = 1000)
+ggsave(paste0("./plots/Pass Wrote Line ", i, ".png"), pass.wrote.line, bg = "transparent", scale = 5, dpi = 1000) 
+}
 pass.wrote.line
 ```
 # Stacked Bar Chart: Proportion of Learners who Passed with Bachelor Pass
@@ -192,33 +200,70 @@ wrote.pass.scatter
 
 # Bar Chart: Comparison of Learners who Passed with Bachelor Pass across Provinces in the Latest Year
 ```{r}
-num.pass.bar <- bachelor.long %>% 
-  filter(matric_class == latest.year) %>% 
-  ggplot(aes(x = reorder(province, num.passed), y = num.passed)) +
-  geom_col(aes(fill = province)) +
-  labs(x = "Province", y = "Learners Passed with Bachelor Pass") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-num.pass.bar
-```
-# Line Chart: Trend of Proportion Learners With Various Percentage Pass in Maths
-```{r}
-math.pass.type <- maths.long %>% 
-  ggplot(aes(x = matric_class)) +
-  geom_line(aes(y =  thirty, group = province)) +
-  geom_line(aes(y = fourty, group = province), linetype = "dashed") +
-  geom_line(aes(y = fifty, group = province), color = "red") +
-  facet_wrap(~province, scales = "free_y") +
-  labs(x = "Matric Class", y = "Percentage of Learners", color = "Type") +
-  theme_minimal() +
-  theme(
-    panel.background = element_rect(fill='transparent'), #transparent panel bg
+province.colors <- c(
+  "South Africa" = "deeppink4",
+  "Eastern Cape" = "darkolivegreen4",
+  "Free State" = "darkviolet",
+  "Gauteng" = "firebrick3",
+  "KwaZulu-Natal" = "darkorchid4",
+  "Limpopo" = "steelblue4",
+  "Mpumalanga" = "goldenrod4",
+  "North West" = "turquoise4",
+  "Northern Cape" = "darkorange4",
+  "Western Cape" = "darkslateblue"
+)
+
+for (i in unique(bachelor.long$matric_class)) {
+  num.pass.bar <- bachelor.long %>% 
+  filter(matric_class == i) %>% 
+  ggplot(aes(x = reorder(province, percentage.pass), y = percentage.pass)) +
+  geom_col_pattern(aes(pattern = province,
+                       pattern_angle = province,
+                       pattern_fill = province,
+                       fill = province)) +
+  scale_pattern_fill_manual(values = province.colors)+
+  theme(panel.background = element_rect(fill='transparent'), #transparent panel bg
     plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
     panel.grid.major = element_blank(), #remove major gridlines
     panel.grid.minor = element_blank(), #remove minor gridlines
     legend.background = element_rect(fill='transparent'), #transparent legend bg
-    legend.box.background = element_rect(fill='transparent') #transparent legend panel
+    legend.box.background = element_rect(fill='transparent'),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    panel.border = element_blank()
+    ) #transparent legend panel)
+
+ggsave(paste0("./plots/num pass bar ", i, ".png"), num.pass.bar, bg = "transparent", scale = 5, dpi = 1000)
+}
+
+num.pass.bar
+```
+# Line Chart: Trend of Proportion Learners With Various Percentage Pass in Maths
+```{r}
+for (i in unique(bachelor.long$province)) {
+  math.pass.type <- maths.long %>% 
+    filter(province == i) %>% 
+  ggplot(aes(x = matric_class)) +
+  geom_line(aes(y =  thirty, size = 2)) +
+  geom_line(aes(y = fourty, size = 2), linetype = "dashed") +
+  geom_line(aes(y = fifty, size = 2), linetype = "dotted") +
+  labs(x = "", y = "") +
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    legend.background = element_rect(fill='transparent'), #transparent legend bg
+    legend.box.background = element_rect(fill='transparent'),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    panel.background = element_blank(),
+    panel.border = element_blank()#transparent legend panel
   )
+  
+  ggsave(paste0("./plots/Maths Pass ", i, ".png"), math.pass.type, bg = "transparent", scale = 5, dpi = 1000) 
+}
+
 
 math.pass.type
 ```
@@ -244,3 +289,13 @@ physics.pass.type <- physics.long %>%
 
 physics.pass.type
 ```
+
+# Overall SA Pass Rate over the Years
+```{r}
+sa.pass.bar <- bachelor.long %>% 
+  ggplot(aes(matric_class, percentage.pass)) +
+  geom_col() +
+  theme_minimal()
+sa.pass.bar
+```
+
