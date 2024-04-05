@@ -20,14 +20,14 @@ library(tmap)
 
 # Read data
 ```{r}
-bachelor.pass <- read.csv("./data/South_Africa_Bachelor_passes_by_province.csv") %>% as_tibble()
+bachelor <- read.csv("./data/South_Africa_Bachelor_passes_by_province.csv") %>% as_tibble()
 maths <- read.csv("./data/South_Africa_Bachelor_passes_by_province.csv") %>% as_tibble()
 physics <- read.csv("./data/South_Africa_National_Senior_Certificate_Physical_Science_results_v2.csv") %>% as_tibble()
 ```
 
 # Look at data
 ```{r}
-summary(bachelor.pass)
+summary(bachelor)
 
 summary(maths)
 
@@ -42,7 +42,7 @@ province.names <- c("zaf" = "South Africa", "ec" = "Eastern Cape", "fs" = "Free 
                     "nc" = "Northern Cape", "wc" = "Western Cape")
 
 # Drop date & percent.
-bachelor.pass <- bachelor.pass %>% 
+bachelor <- bachelor %>% 
   select(-date, -contains("percent"))
 
 maths <- maths %>% 
@@ -54,7 +54,7 @@ physics <- physics %>%
 
 # Pivot Longer
 ```{r}
-bachelor.pass.long <- bachelor.pass %>%
+bachelor.long <- bachelor %>%
 pivot_longer(
     cols = c(starts_with("zaf"), starts_with("ec"), starts_with("fs"),
              starts_with("gp"), starts_with("kzn"), starts_with("lp"),
@@ -121,7 +121,7 @@ pivot_longer(
 
 # Line Chart: Trend of Learners who Wrote Matric Exams and Passed with Bachelor Pass
 ```{r}
-pass.wrote.line <- bachelor.pass.long %>% 
+pass.wrote.line <- bachelor.long %>% 
   ggplot(aes(x = matric_class)) +
   geom_line(aes(y = num.wrote, group = province)) +
   geom_line(aes(y = num.passed, group = province), linetype = "dashed") +
@@ -145,14 +145,14 @@ pass.wrote.line
 ```{r}
 
 # Calculate the proportions
-bachelor.pass.proportions <- bachelor.pass.long %>%
+bachelor.proportions <- bachelor.long %>%
   mutate(total = num.wrote + num.passed) %>%
   pivot_longer(cols = c("num.wrote", "num.passed"), names_to = "type", values_to = "value") %>%
   group_by(matric_class, province) %>%
   mutate(proportion = value / sum(value)) %>%
   ungroup()
 
-pass.proportion.hist <- bachelor.pass.proportions %>%
+pass.proportion.hist <- bachelor.proportions %>%
   ggplot(aes(x = matric_class, y = proportion, fill = type)) +
   geom_col(position = "fill") +
   facet_wrap(~province, scales = "free_y") +
@@ -167,8 +167,8 @@ pass.proportion.hist
 sa.provinces <- ne_states(country = "South Africa", returnclass = "sf")
 
 # Filter data for the latest year and join with province boundaries
-latest.year <- max(bachelor.pass.long$matric_class)
-bachelor.latest <- bachelor.pass.long %>%
+latest.year <- max(bachelor.long$matric_class)
+bachelor.latest <- bachelor.long %>%
   filter(matric_class == latest.year)
 
 map.data <- left_join(sa.provinces, bachelor.latest, by = c("name" = "province"))
@@ -186,7 +186,7 @@ marks.map
 
 # Scatter Plot: Relationship between Learners who Wrote Exams and Passed with Bachelor Pass
 ```{r}
-wrote.pass.scatter <- ggplot(bachelor.pass.long, aes(x = num.wrote, y = num.passed, color = province)) +
+wrote.pass.scatter <- ggplot(bachelor.long, aes(x = num.wrote, y = num.passed, color = province)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   labs(x = "Learners who Wrote Matric Exams", y = "Learners Passed with Bachelor Pass", color = "Province") +
@@ -196,7 +196,7 @@ wrote.pass.scatter
 
 # Bar Chart: Comparison of Learners who Passed with Bachelor Pass across Provinces in the Latest Year
 ```{r}
-num.pass.bar <- bachelor.pass.long %>% 
+num.pass.bar <- bachelor.long %>% 
   filter(matric_class == latest.year) %>% 
   ggplot(aes(x = reorder(province, num.passed), y = num.passed)) +
   geom_col(aes(fill = province)) +
