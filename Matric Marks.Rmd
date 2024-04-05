@@ -36,7 +36,12 @@ summary(physics)
 
 # Clean up data
 ```{r}
-# Drop date & percent
+# Lookup table for converting shorthand to full name.
+province.names <- c("zaf" = "South Africa", "ec" = "Eastern Cape", "fs" = "Free State", "gp" = "Gauteng",
+                    "kzn" = "KwaZulu-Natal", "lp" = "Limpopo", "mp" = "Mpumalanga", "nw" = "North West",
+                    "nc" = "Northern Cape", "wc" = "Western Cape")
+
+# Drop date & percent.
 bachelor.pass <- bachelor.pass %>% 
   select(-date, -contains("percent"))
 
@@ -45,7 +50,6 @@ maths <- maths %>%
 
 physics <- physics %>% 
   select(-date)
-
 ```
 
 # Pivot Longer
@@ -65,17 +69,10 @@ pivot_longer(
     grepl("passed", data1) | grepl("passed", data2) ~ "passed",
     grepl("wrote", data1) | grepl("wrote", data2) ~ "wrote"
   )) %>% 
-  select(-c("data1", "data2"))
-```
-
-# Replace provinces with full name
-```{r}
-province.names <- c("zaf" = "South Africa", "ec" = "Eastern Cape", "fs" = "Free State", "gp" = "Gauteng",
-                    "kzn" = "KwaZulu-Natal", "lp" = "Limpopo", "mp" = "Mpumalanga", "nw" = "North West",
-                    "nc" = "Northern Cape", "wc" = "Western Cape")
-
-bachelor.pass.long <- bachelor.pass.long %>% 
-  mutate(province = province.names[province])
+  select(-c("data1", "data2")) %>%
+  pivot_wider(names_from = type, values_from = value) %>%
+  rename(num.wrote = `wrote`, num.passed = `passed`)%>% 
+  mutate(province = province.names[province]) # Replace provinces with full name
 ```
 
 # Pivot Maths Longer
@@ -95,8 +92,10 @@ pivot_longer(
     grepl("passed", data1) | grepl("passed", data2) ~ "passed",
     grepl("wrote", data1) | grepl("wrote", data2) ~ "wrote"
   )) %>% 
-  select(-c("data1", "data2")) %>% 
-  mutate(province = province.names[province])
+  select(-c("data1", "data2")) %>%
+  pivot_wider(names_from = type, values_from = value) %>%
+  rename(num.wrote = `wrote`, num.passed = `passed`)%>% 
+  mutate(province = province.names[province]) # Replace provinces with full name
 ```
 
 Pivot Physics Longer
@@ -113,9 +112,10 @@ pivot_longer(
     names_sep = "_",
     values_to = "value"
   ) %>%
-  select(matric_class, province, pass.rate) %>% 
-  mutate(province = province.names[province],
-         pass.rate = as.numeric(str_extract(pass.rate, "\\d+")))
+  select(matric_class, province, pass.rate, value) %>% 
+  mutate(province = province.names[province], pass.rate = as.numeric(str_extract(pass.rate, "\\d+"))) %>% # Replace provinces with full name.
+  pivot_wider(names_from = pass.rate, values_from = value) %>%
+  rename(thirty = `30`, fourty = `40`, fifty = `50`)
 ```
 
 
@@ -161,5 +161,13 @@ marks.map <- tm_shape(map.data) +
             legend.outside = T,
             legend.position = c("right", "center"))
 marks.map
+```
+
+```{r}
+ggplot(bachelor.pass.long, aes(x = value[type == "wrote"], y = value[type == "passed"], color = province)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Learners who Wrote Matric Exams", y = "Learners Passed with Bachelor Pass", color = "Province") +
+  theme_minimal()
 ```
 
